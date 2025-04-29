@@ -1,0 +1,44 @@
+name: Trigger auto deployment for spring
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches: 
+      [ main ]
+    paths:
+    - '**'
+    - '.github/workflows/spring-AutoDeployTrigger-12ecb6ae-6997-4035-94a6-75d2d9b6d4b3.yml'
+
+  # Allow manual trigger 
+  workflow_dispatch:
+      
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.SPRING_AZURE_CREDENTIALS }}
+
+      - name: Build and push container image to registry
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          appSourcePath: ${{ github.workspace }}
+          _dockerfilePathKey_: _dockerfilePath_
+          registryUrl: spring.yellowhill-07b03675.eastasia.azurecontainerapps.io
+          registryUsername: ${{ secrets.SPRING_REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.SPRING_REGISTRY_PASSWORD }}
+          containerAppName: spring
+          resourceGroup: springboot
+          imageToBuild: spring.yellowhill-07b03675.eastasia.azurecontainerapps.io/spring:${{ github.sha }}
+          
+            
+
+     
+
